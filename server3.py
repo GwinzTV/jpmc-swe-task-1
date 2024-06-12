@@ -1,4 +1,4 @@
-################################################################################
+##############################################################################
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
 #  copy of this software and associated documentation files (the "Software"),
@@ -33,7 +33,7 @@ from socketserver import ThreadingMixIn
 
 import dateutil.parser
 
-################################################################################
+##############################################################################
 #
 # Config
 
@@ -54,7 +54,7 @@ FREQ = (12, 36, 50)
 OVERLAP = 4
 
 
-################################################################################
+##############################################################################
 #
 # Test Data
 
@@ -87,7 +87,7 @@ def orders(hist):
         yield t, stock, side, order, size
 
 
-################################################################################
+##############################################################################
 #
 # Order Book
 
@@ -142,7 +142,7 @@ def order_book(orders, book, stock_name):
         yield t, bids, asks
 
 
-################################################################################
+###############################################################################
 #
 # Test Data Persistence
 
@@ -160,10 +160,14 @@ def read_csv():
     """ Read a CSV or order history into a list. """
     with open('test.csv', 'rt') as f:
         for time, stock, side, order, size in csv.reader(f):
-            yield dateutil.parser.parse(time), stock, side, float(order), int(size)
+            yield (dateutil.parser.parse(time),
+                   stock,
+                   side,
+                   float(order),
+                   int(size))
 
 
-################################################################################
+###############################################################################
 #
 # Server
 
@@ -205,7 +209,7 @@ def get(req_handler, routes):
     """ Map a request to the appropriate route of a routes instance. """
     for name, handler in routes.__class__.__dict__.items():
         if hasattr(handler, "__route__"):
-            if None != re.search(handler.__route__, req_handler.path):
+            if None is not re.search(handler.__route__, req_handler.path):
                 req_handler.send_response(200)
                 req_handler.send_header('Content-Type', 'application/json')
                 req_handler.send_header('Access-Control-Allow-Origin', '*')
@@ -241,7 +245,7 @@ def run(routes, host='0.0.0.0', port=8080):
     server.waitForThread()
 
 
-################################################################################
+###############################################################################
 #
 # App
 
@@ -296,6 +300,7 @@ class App(object):
             t2, bids2, asks2 = next(self._current_book_2)
         except Exception as e:
             print("error getting stocks...reinitalizing app")
+            print("Error Detail:", e)  # for developers use
             self.__init__()
             t1, bids1, asks1 = next(self._current_book_1)
             t2, bids2, asks2 = next(self._current_book_2)
@@ -329,7 +334,7 @@ class App(object):
             }]
 
 
-################################################################################
+###############################################################################
 #
 # Main
 
