@@ -1,0 +1,289 @@
+From 5d6ae6b3f082930821232d1d4b9bc094ff2f7ac8 Mon Sep 17 00:00:00 2001
+From: Josh Iyinkanmi <89524882+GwinzTV@users.noreply.github.com>
+Date: Wed, 12 Jun 2024 00:11:03 +0100
+Subject: [PATCH 1/2] updated-ratio-and-price
+
+---
+ client3.py | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
+
+diff --git a/client3.py b/client3.py
+index 3fc09b7..74036ae 100644
+--- a/client3.py
++++ b/client3.py
+@@ -1,4 +1,4 @@
+-################################################################################
++##############################################################################
+ #
+ #  Permission is hereby granted, free of charge, to any person obtaining a
+ #  copy of this software and associated documentation files (the "Software"),
+@@ -31,29 +31,40 @@ N = 500
+ 
+ def getDataPoint(quote):
+     """ Produce all the needed values to generate a datapoint """
+-    """ ------------- Update this function ------------- """
++    """ ------------- Function has been updated ------------- """
+     stock = quote['stock']
+     bid_price = float(quote['top_bid']['price'])
+     ask_price = float(quote['top_ask']['price'])
+-    price = bid_price
++    price = (bid_price + ask_price)/2
+     return stock, bid_price, ask_price, price
+ 
+ 
+ def getRatio(price_a, price_b):
+     """ Get ratio of price_a and price_b """
+-    """ ------------- Update this function ------------- """
+-    return 1
++    """ ------------- Function has been updated ------------- """
++    if (price_b == 0):
++        # This will handle the edge case where price_b is 0 to avoid
++        # ZeroDivisionError.
++        return
++    return price_a/price_b
+ 
+ 
+ # Main
+ if __name__ == "__main__":
+     # Query the price once every N seconds.
+     for _ in iter(range(N)):
+-        quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
++        quotes = json.loads(
++            urllib.request.urlopen(QUERY.format(random.random())).read())
+ 
+-        """ ----------- Update to get the ratio --------------- """
++        """ ----------- Main function has been updated --------------- """
++        """-Formatted the entire python file to adhere to PEP8 Regulations-"""
++        prices = {}
+         for quote in quotes:
+             stock, bid_price, ask_price, price = getDataPoint(quote)
+-            print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
++            prices[stock] = price
++            print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock,
++                                                               bid_price,
++                                                               ask_price,
++                                                               price))
+ 
+-        print("Ratio %s" % getRatio(price, price))
++        print("Ratio %s" % getRatio(prices["ABC"], prices["DEF"]))
+-- 
+2.39.3 (Apple Git-146)
+
+
+From a5734988abf8297c55b5c44f39721dcdc95cd2a3 Mon Sep 17 00:00:00 2001
+From: Josh Iyinkanmi <89524882+GwinzTV@users.noreply.github.com>
+Date: Wed, 12 Jun 2024 03:01:15 +0100
+Subject: [PATCH 2/2] added-unit-tests
+
+---
+ README.md      |  2 +-
+ client3.py     |  2 +-
+ client_test.py | 68 +++++++++++++++++++++++++++++++++++++++-----------
+ server3.py     | 25 +++++++++++--------
+ 4 files changed, 71 insertions(+), 26 deletions(-)
+
+diff --git a/README.md b/README.md
+index 14926f5..7b5a088 100644
+--- a/README.md
++++ b/README.md
+@@ -1,2 +1,2 @@
+ # JPMC Task 1
+-Starter repo for task 1 of the JPMC software engineering program
++Completed repo for task 1 of the JPMC software engineering program including unit tests.
+diff --git a/client3.py b/client3.py
+index 74036ae..5eefaec 100644
+--- a/client3.py
++++ b/client3.py
+@@ -36,7 +36,7 @@ def getDataPoint(quote):
+     bid_price = float(quote['top_bid']['price'])
+     ask_price = float(quote['top_ask']['price'])
+     price = (bid_price + ask_price)/2
+-    return stock, bid_price, ask_price, price
++    return (stock, bid_price, ask_price, price)
+ 
+ 
+ def getRatio(price_a, price_b):
+diff --git a/client_test.py b/client_test.py
+index af2bf26..4377b2f 100644
+--- a/client_test.py
++++ b/client_test.py
+@@ -1,24 +1,64 @@
+ import unittest
+-from client3 import getDataPoint
++from client3 import getDataPoint, getRatio
++
+ 
+ class ClientTest(unittest.TestCase):
+-  def test_getDataPoint_calculatePrice(self):
+-    quotes = [
+-      {'top_ask': {'price': 121.2, 'size': 36}, 'timestamp': '2019-02-11 22:06:30.572453', 'top_bid': {'price': 120.48, 'size': 109}, 'id': '0.109974697771', 'stock': 'ABC'},
+-      {'top_ask': {'price': 121.68, 'size': 4}, 'timestamp': '2019-02-11 22:06:30.572453', 'top_bid': {'price': 117.87, 'size': 81}, 'id': '0.109974697771', 'stock': 'DEF'}
+-    ]
+-    """ ------------ Add the assertion below ------------ """
++    def test_getDataPoint_calculatePrice(self):
++        quotes = [
++          {'top_ask': {'price': 121.2, 'size': 36},
++           'timestamp': '2019-02-11 22:06:30.572453',
++           'top_bid': {'price': 120.48, 'size': 109},
++           'id': '0.109974697771',
++           'stock': 'ABC'
++           },
++          {'top_ask': {'price': 121.68, 'size': 4},
++           'timestamp': '2019-02-11 22:06:30.572453',
++           'top_bid': {'price': 117.87, 'size': 81},
++           'id': '0.109974697771',
++           'stock': 'DEF'
++           }
++        ]
++        """ ------------ Add the assertion below ------------ """
++        for quote in quotes:
++            dataPoint = (quote['stock'],
++                         quote['top_bid']['price'],
++                         quote['top_ask']['price'],
++                         (quote['top_bid']['price']
++                          + quote['top_ask']['price'])/2)
++
++            self.assertEqual(getDataPoint(quote), dataPoint)
+ 
+-  def test_getDataPoint_calculatePriceBidGreaterThanAsk(self):
+-    quotes = [
+-      {'top_ask': {'price': 119.2, 'size': 36}, 'timestamp': '2019-02-11 22:06:30.572453', 'top_bid': {'price': 120.48, 'size': 109}, 'id': '0.109974697771', 'stock': 'ABC'},
+-      {'top_ask': {'price': 121.68, 'size': 4}, 'timestamp': '2019-02-11 22:06:30.572453', 'top_bid': {'price': 117.87, 'size': 81}, 'id': '0.109974697771', 'stock': 'DEF'}
+-    ]
+-    """ ------------ Add the assertion below ------------ """
++    def test_getDataPoint_calculatePriceBidGreaterThanAsk(self):
++        quotes = [
++          {'top_ask': {'price': 119.2, 'size': 36},
++           'timestamp': '2019-02-11 22:06:30.572453',
++           'top_bid': {'price': 120.48, 'size': 109},
++           'id': '0.109974697771', 'stock': 'ABC'
++           },
++          {'top_ask': {'price': 121.68, 'size': 4},
++           'timestamp': '2019-02-11 22:06:30.572453',
++           'top_bid': {'price': 117.87, 'size': 81},
++           'id': '0.109974697771', 'stock': 'DEF'
++           }
++        ]
++        """ ------------ Add the assertion below ------------ """
++        for quote in quotes:
++            dataPoint = (quote['stock'],
++                         quote['top_bid']['price'],
++                         quote['top_ask']['price'],
++                         (quote['top_bid']['price']
++                          + quote['top_ask']['price'])/2)
+ 
++            self.assertEqual(getDataPoint(quote), dataPoint)
+ 
+-  """ ------------ Add more unit tests ------------ """
++    """ ------------ Add more unit tests ------------ """
++    def test_getRatio_priceB_equal_zero(self):
++        price_b, price_a = (0, 123)
++        self.assertEqual(getRatio(price_a, price_b), None)
+ 
++    def test_getRatio_priceA_equal_zero(self):
++        price_a, price_b = (0, 123)
++        self.assertEqual(getRatio(price_a, price_b), 0)
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/server3.py b/server3.py
+index 1836de2..a7a68a3 100644
+--- a/server3.py
++++ b/server3.py
+@@ -1,4 +1,4 @@
+-################################################################################
++##############################################################################
+ #
+ #  Permission is hereby granted, free of charge, to any person obtaining a
+ #  copy of this software and associated documentation files (the "Software"),
+@@ -33,7 +33,7 @@ from socketserver import ThreadingMixIn
+ 
+ import dateutil.parser
+ 
+-################################################################################
++##############################################################################
+ #
+ # Config
+ 
+@@ -54,7 +54,7 @@ FREQ = (12, 36, 50)
+ OVERLAP = 4
+ 
+ 
+-################################################################################
++##############################################################################
+ #
+ # Test Data
+ 
+@@ -87,7 +87,7 @@ def orders(hist):
+         yield t, stock, side, order, size
+ 
+ 
+-################################################################################
++##############################################################################
+ #
+ # Order Book
+ 
+@@ -142,7 +142,7 @@ def order_book(orders, book, stock_name):
+         yield t, bids, asks
+ 
+ 
+-################################################################################
++###############################################################################
+ #
+ # Test Data Persistence
+ 
+@@ -160,10 +160,14 @@ def read_csv():
+     """ Read a CSV or order history into a list. """
+     with open('test.csv', 'rt') as f:
+         for time, stock, side, order, size in csv.reader(f):
+-            yield dateutil.parser.parse(time), stock, side, float(order), int(size)
++            yield (dateutil.parser.parse(time),
++                   stock,
++                   side,
++                   float(order),
++                   int(size))
+ 
+ 
+-################################################################################
++###############################################################################
+ #
+ # Server
+ 
+@@ -205,7 +209,7 @@ def get(req_handler, routes):
+     """ Map a request to the appropriate route of a routes instance. """
+     for name, handler in routes.__class__.__dict__.items():
+         if hasattr(handler, "__route__"):
+-            if None != re.search(handler.__route__, req_handler.path):
++            if None is not re.search(handler.__route__, req_handler.path):
+                 req_handler.send_response(200)
+                 req_handler.send_header('Content-Type', 'application/json')
+                 req_handler.send_header('Access-Control-Allow-Origin', '*')
+@@ -241,7 +245,7 @@ def run(routes, host='0.0.0.0', port=8080):
+     server.waitForThread()
+ 
+ 
+-################################################################################
++###############################################################################
+ #
+ # App
+ 
+@@ -296,6 +300,7 @@ class App(object):
+             t2, bids2, asks2 = next(self._current_book_2)
+         except Exception as e:
+             print("error getting stocks...reinitalizing app")
++            print("Error Detail:", e)  # for developers use
+             self.__init__()
+             t1, bids1, asks1 = next(self._current_book_1)
+             t2, bids2, asks2 = next(self._current_book_2)
+@@ -329,7 +334,7 @@ class App(object):
+             }]
+ 
+ 
+-################################################################################
++###############################################################################
+ #
+ # Main
+ 
+-- 
+2.39.3 (Apple Git-146)
+
